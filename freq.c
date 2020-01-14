@@ -1,3 +1,9 @@
+/*
+Creators
+meir fuchs &&Ginton 
+
+*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -131,7 +137,7 @@ int main(int argc,char *argv[] )
     word = (char *)malloc(sizeof(char));
     word[n++] = '\0';
 
-    printf( "Enter a word: " );
+    printf( "Enter a word: \n " );
     c = getchar();
     int i=0;
     while (c != EOF && i<1000000) {
@@ -145,7 +151,7 @@ int main(int argc,char *argv[] )
         } // end while of word
         i++;
         lowerCase(word); // to function lowerCase
-        printf("You've entered \"%s\"\n", word);
+   //     printf("You've entered \"%s\"\n", word);
         insertWord(&head, word); // insert word to the tree.
         free(word);
      //   free(tmp);
@@ -159,7 +165,7 @@ int main(int argc,char *argv[] )
         word[0] = c;
 
     } // end file
-free (word);
+//free (word);
  /*
     insertWord(&head, "ab");
 
