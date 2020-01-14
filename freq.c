@@ -1,6 +1,8 @@
+#include <stdlib.h>
 #include <stdio.h>
-#include<string.h>
-#include<stdlib.h>
+#include <ctype.h>
+#include <string.h>
+
 #define NUM_LETTERS ((int)26)
 typedef enum {FALSE=0, TRUE=1} boolean;
 typedef struct node {
@@ -20,11 +22,16 @@ struct node* getnode()
     return node;
 }
 
-void insertWord (node *root, char *word ) {
-    int len = strlen(word);
-    node *pNode = root;
+//**************************insertWord ***************************
+
+
+void insertWord (node **root, char *word ) {
+if (word[0]==' '||word[0]=='\n'||word[0]=='\t')  return;    
+int len = strlen(word);
+    node* pNode = *root;
     for (int i = 0; i < len; i++) {
         char c = word[i];
+	if (c>='a' &&c<='z'){
         int index = c - 'a';
 //        pNode->letter= c;
 //        pNode->count++;
@@ -32,95 +39,154 @@ void insertWord (node *root, char *word ) {
             pNode->children[index] = getnode();
             pNode = pNode->children[index];
 
-        } else {
-            pNode = pNode->children[index]; //go to the next Node
         }
+	 else { //exsict this char
+            pNode = pNode->children[index]; //go to the next Node
+        } 
         pNode->letter = c;
-        pNode->count++;
 
+}
 
     }
     pNode->endWord = TRUE;
+	pNode->count++;
 
 }
-void printWordDefult (struct node *head, char *word, int level) {
-    node *pNode = head;
+//**************************printWordDefult ***************************
 
-    if (pNode->endWord == TRUE) {
-        word[level] = '\0';
-//        for (int i=0; i<pNode->count;i++) {
-        printf("%s" " %ld \n", word, pNode->count);
-//        }
+
+void printWordDefult ( node *pNode, char *str, int level) {
+    if (pNode->endWord==TRUE) {
+        str[level] = '\0';
+        printf("%s \t %ld \n", str, pNode->count);
+
     }
     for (int i = 0; i < NUM_LETTERS; i++) {
+        if (pNode->children[i] !=NULL) {
+            str[level] = i + 'a';
+            printWordDefult(pNode->children[i], str, level + 1);
+        }
+    }
+}
+
+//**************************printWordReverse ***************************
+
+void printWordReverse( node *pNode, char *str, int level) {
+
+    for (int i = NUM_LETTERS-1; i > -1; i--) {
         if (pNode->children[i]) {
-            word[level] = i + 'a';
-            printWordDefult(pNode->children[i], word, level + 1);
+            str[level] = i + 'a';
+            printWordReverse(pNode->children[i], str, level + 1);
         }
     }
+   if (pNode->endWord==TRUE) {
+        str[level] = '\0';
+        printf("%s \t %ld \n", str, pNode->count);
+
+    }
+
+
+
 }
-    void printWordReverse(struct node *head, char *word, int level) {
-        node *pNode = head;
-
-        if (pNode->endWord == TRUE) {
-            word[level] = '\0';
-//        for (int i=0; i<pNode->count;i++) {
-            printf("%s" " %ld \n", word, pNode->count);
-//        }
-        }
-        for (int i = NUM_LETTERS-1; i > 0; i--) {
-            if (pNode->children[i]) {
-                word[level] = i + 'a';
-                printWordReverse(pNode->children[i], word, level + 1);
-            }
-        }
-
-    }
-    // // returns True if given node has any children
-     int haveChildren(node* curr)
+// returns True if given node has any children
+int haveChildren(node* curr)
 {
-for (int i = 0; i < NUM_LETTERS; i++)
-if (curr->children[i])
-return TRUE;	// child found
+    for (int i = 0; i < NUM_LETTERS; i++)
+        if (curr->children[i])
+            return TRUE;	// child found
 
-return FALSE;
+    return FALSE;
+}
+
+// ***** destroy the tree from the memory ******
+
+void delete (node *toDelete){
+
+
+    for (int i=0; i<NUM_LETTERS; i++){
+        if (toDelete->children[i])
+            delete(toDelete->children[i]);
+    }
+    free(toDelete);
 }
 
 
-void delete (node* root){
-    node* pRoot = root;
-    if (pRoot!=NULL){
-//    if (haveChildren(pRoot)==FALSE){
-      if (pRoot->endWord==TRUE){
-        free(pRoot);
+// ********function loweer case
+
+void lowerCase (char* word){
+    
+    for (int i=0; i<strlen(word); i++){
+        word[i] = tolower(word[i]);
     }
-    else{
-        for (int i=0; i<NUM_LETTERS; i++){
-            if (pRoot->children[i])
-                delete(pRoot->children[i]);
-        }
-    }
-    }
+
 }
-    int main() {
-        struct node *head = getnode();
+int main(int argc,char *argv[] )
+{
+    node* head = getnode();
+// insert words from file: 
+    char c;
+    size_t n;
+    char *word;
+    n = 0;
+    word = (char *)malloc(sizeof(char));
+    word[n++] = '\0';
 
-        insertWord(head, "abc");
-        insertWord(head, "bac");
-        insertWord(head, "bac");
-        insertWord(head, "abc");
-        insertWord(head, "ddd");
-        insertWord(head, "aaa");
+    printf( "Enter a word: " );
+    c = getchar();
+    int i=0;
+    while (c != EOF && i<1000000) {
+        while ( (c != EOF && c!=' '&& c!='\t'&& c != '\n')&& i<10000000) {
+            word = realloc(word, (n + 1)*sizeof(char));
 
+            word[n-1] = c;
+            word[n++] = '\0';
+            c = getchar();
+            i++;
+        } // end while of word
+        i++;
+        lowerCase(word); // to function lowerCase
+        printf("You've entered \"%s\"\n", word);
+        insertWord(&head, word); // insert word to the tree.
+        free(word);
+     //   free(tmp);
+        //   if (c== EOF || c == '\n') break;
+        c = getchar();
+	if (c==EOF) break;
 
-        //abc bac bac abc ddd aaa
+        n=1;
+        word = (char *)malloc(sizeof(char));
 
-        char str[30];
+        word[0] = c;
+
+    } // end file
+free (word);
+ /*
+    insertWord(&head, "ab");
+
+    insertWord(&head, "ab");
+    insertWord(&head, "ab");
+    insertWord(&head, "ab");
+    insertWord(&head, "ab");
+    insertWord(&head, "ab");
+    insertWord(&head, "a");
+*/   
+
+    char* str =(char *)malloc(sizeof(char));
+    if (argc==1){
+ printf("Defult \n");
         printWordDefult(head, str, 0);
-        delete(head);
-//        printf("Defullt \n");
+}
+    else if(argv[1][0]=='r'){
+        printf("Reverse \n");
+ 	printWordReverse(head, str, 0);
 
-//        printWordReverse(head, str, 0);
+}
+free (str);
+    delete(head);
+    //  free(head);
+}
 
-    }
+
+
+
 
